@@ -48,6 +48,7 @@ class CloudStorageApplicationTests {
 	 * PLEASE DO NOT DELETE THIS method.
 	 * Helper method for Udacity-supplied sanity checks.
 	 **/
+
 	private void doMockSignUp(String firstName, String lastName, String userName, String password){
 		// Create a dummy account for logging in later.
 
