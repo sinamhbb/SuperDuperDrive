@@ -38,4 +38,8 @@ public class FileService {
         User user = userMapper.getUser(username);
         return fileMapper.getUserFiles(user.getUserid());
     }
+
+    public int deleteFile(String fileId) {
+        return fileMapper.delete(Integer.parseInt(fileId));
+    }
 }

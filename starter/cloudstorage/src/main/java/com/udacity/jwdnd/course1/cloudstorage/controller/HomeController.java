@@ -25,12 +25,8 @@ public class HomeController {
 
     @GetMapping("/home")
     public String homeView(Model model,Authentication authentication) {
-        List<File> savedFiles = fileService.getFiles(authentication.getName());
-//        savedFiles.forEach(file -> {
-//            System.out.println(file.getFilename());
-//        });
 
-        model.addAttribute("Files", savedFiles);
+        model.addAttribute("Files", fileService.getFiles(authentication.getName()));
 
         return "home";
     }
@@ -42,12 +38,15 @@ public class HomeController {
             Authentication authentication) throws IOException {
 
         int fileId = fileService.saveFile(fileUpload, authentication.getName());
-        List<File> savedFiles = fileService.getFiles(authentication.getName());
-//        savedFiles.forEach(file -> {
-//            System.out.println(file.getFilename());
-//        });
-        model.addAttribute("Files", savedFiles);
-//        System.out.println(fileService.getFile(fileId).getFilename());
+
+        model.addAttribute("Files", fileService.getFiles(authentication.getName()));
+        return "home";
+    }
+
+    @GetMapping("/file-delete")
+    public String handleFileDelete(@RequestParam(value="fileId") String fileId, Authentication authentication, Model model) {
+        var deleteId = fileService.deleteFile(fileId);
+        model.addAttribute("Files", fileService.getFiles(authentication.getName()));
         return "home";
     }
 
