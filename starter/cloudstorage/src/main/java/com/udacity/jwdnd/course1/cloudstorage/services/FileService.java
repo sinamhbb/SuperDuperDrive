@@ -22,6 +22,16 @@ public class FileService {
         this.userMapper = userMapper;
     }
 
+    public List<File> getFiles(String username) {
+
+        User user = userMapper.getUser(username);
+        return fileMapper.getUserFiles(user.getUserid());
+    }
+
+    public File getFile(String fileId) {
+        return fileMapper.getFile(Integer.parseInt(fileId));
+    }
+
     public int saveFile(MultipartFile fileUpload,String username) throws IOException {
         User user = userMapper.getUser(username);
         return fileMapper.insert(new File(
@@ -30,14 +40,10 @@ public class FileService {
                 fileUpload.getContentType(),
                 fileUpload.getSize(),
                 user.getUserid(),
-                fileUpload.getInputStream()));
+                fileUpload.getBytes()));
     }
 
-    public List<File> getFiles(String username) {
 
-        User user = userMapper.getUser(username);
-        return fileMapper.getUserFiles(user.getUserid());
-    }
 
     public int deleteFile(String fileId) {
         return fileMapper.delete(Integer.parseInt(fileId));
