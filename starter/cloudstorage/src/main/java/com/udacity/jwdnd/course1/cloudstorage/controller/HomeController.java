@@ -19,16 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
 
 @Controller()
-//@RequestMapping("/home")
 public class HomeController {
+
  private final FileService fileService;
 
     public HomeController(FileService fileService) {
@@ -43,47 +40,5 @@ public class HomeController {
         return "home";
     }
 
-    @PostMapping("/file-upload")
-    public ModelAndView handleFileUpload(
-            @RequestParam("fileUpload")MultipartFile fileUpload,
-            Model model,
-            Authentication authentication,
-            HttpServletRequest request
-    ) {
-        try {
-            int fileId = fileService.saveFile(fileUpload, authentication.getName());
 
-            model.addAttribute("Files", fileService.getFiles(authentication.getName()));
-            request.setAttribute("errorMessage", "null");
-            return new ModelAndView("/result");
-        } catch (Exception e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            return new ModelAndView("/result");
-        }
-    }
-
-    @GetMapping("/file-download")
-    public ResponseEntity<Resource> handleFileDownload(@RequestParam(value = "fileId") String fileId, Authentication authentication, Model model) throws IOException {
-        File file = fileService.getFile(fileId);
-        System.out.println(file.getFilename());
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(file.getContenttype()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
-                .body(new ByteArrayResource(file.getFiledata()));
-
-    }
-
-    @GetMapping("/file-delete")
-    public ModelAndView handleFileDelete(@RequestParam(value="fileId") String fileId, Authentication authentication, Model model, HttpServletRequest request) {
-
-        try {
-            var deleteId = fileService.deleteFile(fileId);
-            model.addAttribute("Files", fileService.getFiles(authentication.getName()));
-            request.setAttribute("errorMessage", "null");
-            return new ModelAndView("/result");
-        } catch (Exception e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            return new ModelAndView("/result");
-        }
-    }
 }
