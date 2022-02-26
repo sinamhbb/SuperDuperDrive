@@ -32,8 +32,11 @@ public class FileService {
         return fileMapper.getFile(Integer.parseInt(fileId));
     }
 
-    public int saveFile(MultipartFile fileUpload,String username) throws IOException {
+    public int saveFile(MultipartFile fileUpload, String username) throws IOException, IllegalArgumentException {
         User user = userMapper.getUser(username);
+        if (fileMapper.existingFileCount(fileUpload.getOriginalFilename()) > 0) {
+            throw new IllegalArgumentException("You have uploaded the same file Before");
+        }
         return fileMapper.insert(new File(
                 null,
                 fileUpload.getOriginalFilename(),
@@ -44,8 +47,7 @@ public class FileService {
     }
 
 
-
     public int deleteFile(String fileId) {
-        return fileMapper.delete(Integer.parseInt(fileId));
+        return fileMapper.deleteById(Integer.parseInt(fileId));
     }
 }

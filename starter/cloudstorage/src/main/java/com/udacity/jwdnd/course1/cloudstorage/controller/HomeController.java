@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.core.io.Resource;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -40,15 +44,22 @@ public class HomeController {
     }
 
     @PostMapping("/file-upload")
-    public String handleFileUpload(
+    public ModelAndView handleFileUpload(
             @RequestParam("fileUpload")MultipartFile fileUpload,
             Model model,
-            Authentication authentication) throws IOException {
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        try {
+            int fileId = fileService.saveFile(fileUpload, authentication.getName());
 
-        int fileId = fileService.saveFile(fileUpload, authentication.getName());
-
-        model.addAttribute("Files", fileService.getFiles(authentication.getName()));
-        return "home";
+            model.addAttribute("Files", fileService.getFiles(authentication.getName()));
+            request.setAttribute("errorMessage", "null");
+            return new ModelAndView("/result");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", e.getMessage());
+            return new ModelAndView("/result");
+        }
     }
 
     @GetMapping("/file-download")
@@ -63,10 +74,16 @@ public class HomeController {
     }
 
     @GetMapping("/file-delete")
-    public String handleFileDelete(@RequestParam(value="fileId") String fileId, Authentication authentication, Model model) {
-        var deleteId = fileService.deleteFile(fileId);
-        model.addAttribute("Files", fileService.getFiles(authentication.getName()));
-        return "home";
-    }
+    public ModelAndView handleFileDelete(@RequestParam(value="fileId") String fileId, Authentication authentication, Model model, HttpServletRequest request) {
 
+        try {
+            var deleteId = fileService.deleteFile(fileId);
+            model.addAttribute("Files", fileService.getFiles(authentication.getName()));
+            request.setAttribute("errorMessage", "null");
+            return new ModelAndView("/result");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", e.getMessage());
+            return new ModelAndView("/result");
+        }
+    }
 }
