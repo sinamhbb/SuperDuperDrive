@@ -35,6 +35,7 @@ public class FileController {
             Authentication authentication,
             HttpServletRequest request
     ) {
+
         try {
             int fileId = fileService.saveFile(fileUpload, authentication.getName());
 
@@ -60,7 +61,6 @@ public class FileController {
 
     @GetMapping("/file-delete")
     public ModelAndView handleFileDelete(@RequestParam(value="fileId") String fileId, Authentication authentication, Model model, HttpServletRequest request) {
-
         try {
             var deleteId = fileService.deleteFile(fileId);
             model.addAttribute("Files", fileService.getFiles(authentication.getName()));

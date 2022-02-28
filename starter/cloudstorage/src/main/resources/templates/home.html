@@ -77,8 +77,8 @@
                                 <tbody th:each="note : ${Notes}">
                                     <tr>
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button type="button" class="btn btn-success" th:data-parameter1="${note.noteid}" th:data-parameter2="${note.notetitle}" th:data-parameter3="${note.notedescription}" th:onclick="showNoteModal(this.getAttribute('data-parameter1'), this.getAttribute('data-parameter2'),this.getAttribute('data-parameter3'))" >Edit</button>
+                                            <a class="btn btn-danger" th:href="@{/delete-note(noteid=${note.noteid})}">Delete</a>
                                         </td>
                                         <th scope="row" th:text="${note.notetitle}">Example Note Title</th>
                                         <td th:text="${note.notedescription}">Example Note Description </td>
@@ -97,8 +97,8 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:object="${newNote}" th:action="@{/add-new-note}" action="#" method="POST">
-                                            <input type="hidden" name="noteId" id="note-id">
+                                        <form th:object="${newNote}" th:action="@{/upsert-note}" action="#" method="POST" >
+                                            <input type="hidden" name="noteId" id="note-id" th:field="*{noteid}">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
                                                 <input type="text" name= "noteTitle" class="form-control" id="note-title" th:field="*{notetitle}" maxlength="20" required>
@@ -209,5 +209,6 @@
                 $('#credentialModal').modal('show');
             }
         </script>
+
     </body>
 </html>

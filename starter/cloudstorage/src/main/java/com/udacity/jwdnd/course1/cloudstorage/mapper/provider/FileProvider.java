@@ -29,4 +29,5 @@ public class FileProvider {
            DELETE_FROM(TABLE_NAME).WHERE("fileId = ${fileId}");
         }}.toString();
     }
+
 }

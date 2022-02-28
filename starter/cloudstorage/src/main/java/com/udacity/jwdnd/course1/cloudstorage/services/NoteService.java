@@ -26,10 +26,19 @@ public class NoteService {
         return noteMapper.getUserNotes(user.getUserid());
     }
 
-    public int saveNewNote(NoteForm newNote, String username) {
-        if (noteMapper.existingNoteCount(newNote.getNotetitle()) > 0) {
-            throw new IllegalArgumentException("You have uploaded the same file Before");
+    public Note getNoteById(String noteid) {
+        return noteMapper.getNoteById(Integer.parseInt(noteid));
+    };
+
+    public int upsertNote(NoteForm receivedNote, String username) {
+        if (receivedNote.getNoteid() != null) {
+           return noteMapper.update(new Note(receivedNote.getNoteid(), receivedNote.getNotetitle(), receivedNote.getNotedescription(), userMapper.getUser(username).getUserid()));
         }
-        return noteMapper.insert(new Note(null, newNote.getNotetitle(), newNote.getNotedescription(), userMapper.getUser(username).getUserid()));
+        return noteMapper.insert(new Note(null, receivedNote.getNotetitle(), receivedNote.getNotedescription(), userMapper.getUser(username).getUserid()));
     }
+
+    public int deleteNote(String noteid) {
+        return noteMapper.delete(Integer.parseInt(noteid));
+    }
+
 }

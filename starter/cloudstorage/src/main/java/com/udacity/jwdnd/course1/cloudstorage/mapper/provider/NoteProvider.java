@@ -14,12 +14,25 @@ public class NoteProvider {
     }
 
     public String insert(Note note) {
-
         return new SQL() {{
             INSERT_INTO(TABLE_NAME)
                     .VALUES("notetitle", "#{notetitle}")
                     .VALUES("notedescription", "#{notedescription}")
                     .VALUES("userid", "#{userid}");
+        }}.toString();
+    }
+
+    public String delete(int noteid){
+        return new SQL() {{
+            DELETE_FROM(TABLE_NAME).WHERE("noteid=#{noteid}");
+        }}.toString();
+    }
+
+    public String update(Note note) {
+        return new SQL() {{
+            UPDATE(TABLE_NAME).WHERE("noteid=#{noteid}")
+                    .SET("notetitle=#{notetitle}")
+                    .SET("notedescription=#{notedescription}");
         }}.toString();
     }
 
