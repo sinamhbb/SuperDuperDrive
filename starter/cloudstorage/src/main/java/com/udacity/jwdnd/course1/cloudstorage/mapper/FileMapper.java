@@ -19,23 +19,11 @@ public interface FileMapper {
     @SelectProvider(type = FileProvider.class, method = "countFile")
     int existingFileCount(String filename);
 
-//    @Insert("INSERT INTO FILES (filename, contenttype, filesize, userid, filedata) VALUES(#{filename}, #{contenttype}, #{filesize}, #{userid}, #{filedata})")
     @InsertProvider(type = FileProvider.class, method = "insert")
     @Options(useGeneratedKeys = true,keyProperty = "fileId")
     int insert(File file);
 
-//    @Delete("DELETE FROM FILES WHERE fileId = ${fileId}")
     @DeleteProvider(type = FileProvider.class, method = "deleteById")
     int deleteById(int fileId);
 
 }
-
-
-//"<script>"
-//        + "IF NOT EXISTS (SELECT 1 FROM FILES "
-//        + "WHERE filename=${filename} "
-//        + "AND filesize=${filesize} "
-//        + "OR contenttype=${contenttype}) "
-//        + "INSERT INTO FILES (filename, contenttype, filesize, userid, filedata) "
-//        + "VALUES(${filename}, ${contenttype}, ${filesize}, ${userid}, ${filedata})"
-//        + "</script>"

@@ -35,23 +35,29 @@ public class FileController {
             Authentication authentication,
             HttpServletRequest request
     ) {
+        request.setAttribute("tab", "files");
 
-        try {
-            int fileId = fileService.saveFile(fileUpload, authentication.getName());
+        if (fileUpload.isEmpty()) {
+            request.setAttribute("errorMessage", "No File Found");
+            return new ModelAndView("/result");
+        } else {
 
-            model.addAttribute("Files", fileService.getFiles(authentication.getName()));
-            request.setAttribute("errorMessage", "null");
-            return new ModelAndView("/result");
-        } catch (Exception e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            return new ModelAndView("/result");
+            try {
+                int fileId = fileService.saveFile(fileUpload, authentication.getName());
+                model.addAttribute("Files", fileService.getFiles(authentication.getName()));
+                request.setAttribute("errorMessage", "null");
+                return new ModelAndView("/result");
+            } catch (Exception e) {
+                request.setAttribute("errorMessage", e.getMessage());
+                return new ModelAndView("/result");
+            }
         }
+
     }
 
     @GetMapping("/file-download")
-    public ResponseEntity<Resource> handleFileDownload(@RequestParam(value = "fileId") String fileId, Authentication authentication, Model model) throws IOException {
+    public ResponseEntity<Resource> handleFileDownload(@RequestParam(value = "fileId") String fileId) throws IOException {
         File file = fileService.getFile(fileId);
-        System.out.println(file.getFilename());
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.getContenttype()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
@@ -61,6 +67,7 @@ public class FileController {
 
     @GetMapping("/file-delete")
     public ModelAndView handleFileDelete(@RequestParam(value="fileId") String fileId, Authentication authentication, Model model, HttpServletRequest request) {
+        request.setAttribute("tab", "files");
         try {
             var deleteId = fileService.deleteFile(fileId);
             model.addAttribute("Files", fileService.getFiles(authentication.getName()));

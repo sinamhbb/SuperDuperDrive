@@ -25,6 +25,4 @@ public interface CredentialMapper {
     @DeleteProvider(type = CredentialProvider.class, method="delete")
     Integer delete(Integer credentialid);
 
-
-
 }

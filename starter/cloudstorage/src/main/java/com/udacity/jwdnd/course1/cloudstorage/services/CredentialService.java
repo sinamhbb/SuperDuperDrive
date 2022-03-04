@@ -17,13 +17,11 @@ public class CredentialService {
 
     private final CredentialMapper credentialMapper;
     private final UserMapper userMapper;
-    private final HashService hashService;
     private final EncryptionService encryptionService;
 
     public CredentialService(CredentialMapper credentialMapper, UserMapper userMapper, HashService hashService, EncryptionService encryptionService) {
         this.credentialMapper = credentialMapper;
         this.userMapper = userMapper;
-        this.hashService = hashService;
         this.encryptionService = encryptionService;
     }
 
@@ -38,12 +36,12 @@ public class CredentialService {
         byte[] key = new byte[16];
         random.nextBytes(key);
         String encodedKey = Base64.getEncoder().encodeToString(key);
-        String encriptedPassword = encryptionService.encryptValue(credentialForm.getPassword(),encodedKey);
+        String encryptedPassword = encryptionService.encryptValue(credentialForm.getPassword(),encodedKey);
 
         if (credentialForm.getCredentialid() != null) {
-            return credentialMapper.update(new Credential(credentialForm.getCredentialid(), credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encriptedPassword, userMapper.getUser(username).getUserid()));
+            return credentialMapper.update(new Credential(credentialForm.getCredentialid(), credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encryptedPassword, userMapper.getUser(username).getUserid()));
         }
-        return credentialMapper.insert(new Credential(null, credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encriptedPassword, userMapper.getUser(username).getUserid()));
+        return credentialMapper.insert(new Credential(null, credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encryptedPassword, userMapper.getUser(username).getUserid()));
     }
 
     public int deleteCredential(String credentialid) {

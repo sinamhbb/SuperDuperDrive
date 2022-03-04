@@ -32,6 +32,4 @@ public class HomeController {
         model.addAttribute("Credentials", credentialService.getUserCredentials(authentication.getName()));
         return "home";
     }
-
-
 }

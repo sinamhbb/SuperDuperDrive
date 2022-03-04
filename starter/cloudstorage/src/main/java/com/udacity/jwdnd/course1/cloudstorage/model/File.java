@@ -9,11 +9,11 @@ public class File {
     private String filename;
     private String contenttype;
     private Long filesize;
-    private int userid;
+    private Integer userid;
     private byte[] filedata;
     
 
-    public File(Integer fileId, String filename, String contenttype, Long filesize, int userid,  byte[] filedata) {
+    public File(Integer fileId, String filename, String contenttype, Long filesize, Integer userid,  byte[] filedata) {
         this.fileId = fileId;
         this.filename = filename;
         this.contenttype = contenttype;

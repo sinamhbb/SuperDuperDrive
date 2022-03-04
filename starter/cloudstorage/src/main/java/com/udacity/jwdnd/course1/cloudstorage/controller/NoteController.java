@@ -25,6 +25,7 @@ public class NoteController {
 
     @PostMapping("/upsert-note")
     public ModelAndView handleNewNote(@ModelAttribute("newNote") NoteForm newNote, Model model, Authentication authentication, HttpServletRequest request) {
+        request.setAttribute("tab", "notes");
         try {
             noteService.upsertNote(newNote, authentication.getName());
             model.addAttribute("Notes", noteService.getUserNotes(authentication.getName()));
@@ -38,6 +39,7 @@ public class NoteController {
 
     @GetMapping("/delete-note")
     public ModelAndView handleDeleteNote(@RequestParam("noteid") String noteid, Model model, Authentication authentication, HttpServletRequest request) {
+        request.setAttribute("tab", "notes");
         try {
             noteService.deleteNote(noteid);
             model.addAttribute("Notes", noteService.getUserNotes(authentication.getName()));

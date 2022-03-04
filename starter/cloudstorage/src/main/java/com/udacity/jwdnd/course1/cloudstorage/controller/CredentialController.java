@@ -12,36 +12,35 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class CredentialController {
     private final CredentialService credentialService;
-    private final EncryptionService encryptionService;
 
     public CredentialController(CredentialService credentialService, EncryptionService encryptionService) {
         this.credentialService = credentialService;
-        this.encryptionService = encryptionService;
     }
 
     @PostMapping("/upsert-credential")
     public ModelAndView handleUpsertCredential(@ModelAttribute("newCredential") CredentialForm credentialForm, Model model, Authentication authentication, HttpServletRequest request) {
+        request.setAttribute("tab", "credentials");
         try {
             credentialService.upsertCredential(credentialForm, authentication.getName());
             model.addAttribute("Credentials", credentialService.getUserCredentials(authentication.getName()));
             request.setAttribute("errorMessage", "null");
+
             return new ModelAndView("/result");
 
         } catch (Exception e) {
             request.setAttribute("errorMessage", e.getMessage());
             return new ModelAndView("/result");
         }
-
     }
 
     @GetMapping("/delete-credential")
     public ModelAndView handleDeleteCredential(@RequestParam("credentialid") String credentialid, Model model, Authentication authentication, HttpServletRequest request) {
+        request.setAttribute("tab", "credentials");
         try {
             credentialService.deleteCredential(credentialid);
             model.addAttribute("Credentials", credentialService.getUserCredentials(authentication.getName()));
