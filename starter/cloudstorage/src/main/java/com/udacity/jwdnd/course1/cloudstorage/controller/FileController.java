@@ -61,7 +61,7 @@ public class FileController {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.getContenttype()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
-                .body(new ByteArrayResource(file.getFiledata()));
+                .body(new ByteArrayResource(file.getFiledata().readAllBytes()));
 
     }
 

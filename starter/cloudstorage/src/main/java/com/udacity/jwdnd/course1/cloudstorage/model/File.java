@@ -10,10 +10,10 @@ public class File {
     private String contenttype;
     private Long filesize;
     private Integer userid;
-    private byte[] filedata;
+    private InputStream filedata;
     
 
-    public File(Integer fileId, String filename, String contenttype, Long filesize, Integer userid,  byte[] filedata) {
+    public File(Integer fileId, String filename, String contenttype, Long filesize, Integer userid,  InputStream filedata) {
         this.fileId = fileId;
         this.filename = filename;
         this.contenttype = contenttype;
@@ -62,11 +62,11 @@ public class File {
         this.userid = userid;
     }
 
-    public byte[] getFiledata() {
+    public InputStream getFiledata() {
         return filedata;
     }
 
-    public void setFiledata(byte[] filedata) {
+    public void setFiledata(InputStream filedata) {
         this.filedata = filedata;
     }
 }

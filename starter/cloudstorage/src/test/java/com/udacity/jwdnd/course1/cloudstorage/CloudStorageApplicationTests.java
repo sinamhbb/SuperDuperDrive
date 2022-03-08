@@ -1,11 +1,9 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,6 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -20,6 +21,13 @@ class CloudStorageApplicationTests {
 	private int port;
 
 	private WebDriver driver;
+	private WebDriverWait wait;
+
+	private LoginPage loginPage;
+	private SignupPage signupPage;
+	private HomePage homaPage;
+	private ResultPage resultPage;
+
 
 	@BeforeAll
 	static void beforeAll() {
@@ -29,6 +37,14 @@ class CloudStorageApplicationTests {
 	@BeforeEach
 	public void beforeEach() {
 		this.driver = new ChromeDriver();
+		wait = new WebDriverWait(driver, 1);
+
+
+		loginPage = new LoginPage(driver);
+		signupPage = new SignupPage(driver);
+		homaPage = new HomePage(driver);
+		resultPage = new ResultPage(driver);
+
 	}
 
 	@AfterEach
@@ -41,8 +57,10 @@ class CloudStorageApplicationTests {
 	@Test
 	public void getLoginPage() {
 		driver.get("http://localhost:" + this.port + "/login");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 	}
+
+
 
 	/**
 	 * PLEASE DO NOT DELETE THIS method.
@@ -87,7 +105,11 @@ class CloudStorageApplicationTests {
 		// You may have to modify the element "success-msg" and the sign-up 
 		// success message below depening on the rest of your code.
 		*/
+
 		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
+		WebElement loginLink = driver.findElement(By.id("login-link"));
+		loginLink.click();
+		wait.until(WebDriver::getTitle);
 	}
 
 	
@@ -137,7 +159,7 @@ class CloudStorageApplicationTests {
 		doMockSignUp("Redirection","Test","RT","123");
 		
 		// Check if we have been redirected to the log in page.
-		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+		assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
 	}
 
 	/**
@@ -201,6 +223,93 @@ class CloudStorageApplicationTests {
 
 	}
 
+	@Test
+	public void unauthorizedUserAccessTest() {
+		driver.get("http://localhost:" + this.port + "/login");
+		wait.until(WebDriver::getTitle);
+		assertEquals(driver.getTitle(),"Login");
 
+		driver.get("http://localhost:" + this.port + "/signup");
+		wait.until(WebDriver::getTitle);
+		assertEquals(driver.getTitle(),"Sign Up");
+
+		driver.get("http://localhost:" + this.port + "/home");
+		wait.until(WebDriver::getTitle);
+		assertNotEquals(driver.getTitle(),"Home");
+
+		driver.get("http://localhost:" + this.port + "/result");
+		wait.until(WebDriver::getTitle);
+		assertNotEquals(driver.getTitle(),"Result");
+	}
+
+	@Test
+	public void homePageAccessibility() {
+		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+		doLogIn("Sina.M", "123");
+		assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		homaPage.logout();
+
+		wait.until(WebDriver::getTitle);
+		driver.get("http://localhost:" + this.port + "/home");
+		assertNotEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+	}
+
+	@Test
+	public void noteCreationFunctionalityTest() throws InterruptedException {
+		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+
+		doLogIn("Sina.M", "123");
+
+		NoteForm submittedNote = homaPage.createNote();
+		wait.until(WebDriver::getTitle);
+		driver.findElement(By.id("success-message-back-home")).click();
+		wait.until(WebDriver::getTitle);
+
+		NoteForm savedNote = homaPage.checkSubmittedNote();
+		assertEquals(submittedNote.getNotetitle(), savedNote.getNotetitle());
+		assertEquals(submittedNote.getNotedescription(), savedNote.getNotedescription());
+	}
+
+	@Test
+	public void noteEditFunctionalityTest() throws InterruptedException {
+		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+
+		doLogIn("Sina.M", "123");
+
+		NoteForm submittedNote = homaPage.createNote();
+		wait.until(WebDriver::getTitle);
+		driver.findElement(By.id("success-message-back-home")).click();
+		wait.until(WebDriver::getTitle);
+
+		NoteForm editedNote = homaPage.editNote();
+		wait.until(WebDriver::getTitle);
+		driver.findElement(By.id("success-message-back-home")).click();
+
+		NoteForm savedNote = homaPage.checkSubmittedNote();
+		assertEquals(editedNote.getNotetitle(), savedNote.getNotetitle());
+		assertEquals(editedNote.getNotedescription(), savedNote.getNotedescription());
+
+	}
+
+	@Test
+	public void noteDeleteFunctionalityTest() {
+		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+
+		doLogIn("Sina.M", "123");
+
+		NoteForm submittedNote = homaPage.createNote();
+		wait.until(WebDriver::getTitle);
+		driver.findElement(By.id("success-message-back-home")).click();
+		wait.until(WebDriver::getTitle);
+
+		homaPage.deleteNote();
+		wait.until(WebDriver::getTitle);
+		driver.findElement(By.id("success-message-back-home")).click();
+
+		assertThrows(NoSuchElementException.class,() -> { driver.findElement(By.id("saved-note-description"));});
+		assertThrows(NoSuchElementException.class,() -> { driver.findElement(By.id("saved-note-title"));});
+
+	}
 
 }

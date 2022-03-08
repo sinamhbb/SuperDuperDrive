@@ -43,7 +43,7 @@ public class FileService {
                 fileUpload.getContentType(),
                 fileUpload.getSize(),
                 user.getUserid(),
-                fileUpload.getBytes()));
+                fileUpload.getInputStream()));
     }
 
 
