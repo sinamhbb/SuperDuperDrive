@@ -19,6 +19,22 @@ public class HomePage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
+    private final NoteForm noteToBeSaved = new NoteForm(null, "Test To Do", "Write a test that creates a note, and verifies it is displayed.");
+    private final NoteForm noteToBeEdited = new NoteForm(null, "Test To Edit", "Write a test that edits an existing note and verifies that the changes are displayed.");
+
+
+    private final List<CredentialForm> credentialsToBeSaved = Arrays.asList(
+            new CredentialForm(null, "www.cuploop.com", "Sina.M", "123"),
+            new CredentialForm(null, "www.google.com", "ssssina", "asd"),
+            new CredentialForm(null, "www.wise.com", "AAAA", "z")
+    );
+
+    private final List<CredentialForm> credentialsToBeEdited = Arrays.asList(
+            new CredentialForm(null, "www.amazon.com", "Sina_Mohebbi", "123"),
+            new CredentialForm(null, "www.facebook.com", "sinaaaaa", "asd"),
+            new CredentialForm(null, "www.Revolut.com", "gggg", "z")
+    );
+
 
     public HomePage(WebDriver driver) {
         PageFactory.initElements(driver, this);
@@ -87,6 +103,10 @@ public class HomePage {
     private WebElement credentialSubmitButton;
 
 
+    public void logout() {
+        logoutButton.click();
+    }
+
     // Note Methods
 
     public NoteForm createNote() {
@@ -94,7 +114,6 @@ public class HomePage {
         wait.until(ExpectedConditions.elementToBeClickable(addNewNoteButton));
         addNewNoteButton.click();
 
-        NoteForm noteToBeSaved = new NoteForm(null, "Test To Do", "Write a test that creates a note, and verifies it is displayed.");
         wait.until(ExpectedConditions.elementToBeClickable(noteTitleInput));
         noteTitleInput.sendKeys(noteToBeSaved.getNotetitle());
         noteDescriptionInput.sendKeys(noteToBeSaved.getNotedescription());
@@ -103,42 +122,36 @@ public class HomePage {
     }
 
     public NoteForm editNote() {
+        noteTabLink.click();
         wait.until(ExpectedConditions.visibilityOf(editNoteButton));
         editNoteButton.click();
 
-        NoteForm noteToBeSaved = new NoteForm(null, "Test To Edit", "Write a test that edits an existing note and verifies that the changes are displayed.");
         wait.until(ExpectedConditions.elementToBeClickable(noteTitleInput));
         noteTitleInput.clear();
+        noteTitleInput.sendKeys(noteToBeEdited.getNotetitle());
         noteDescriptionInput.clear();
-        noteTitleInput.sendKeys(noteToBeSaved.getNotetitle());
-        noteDescriptionInput.sendKeys(noteToBeSaved.getNotedescription());
+        noteDescriptionInput.sendKeys(noteToBeEdited.getNotedescription());
         noteSubmitButton.click();
-        return noteToBeSaved;
+        return noteToBeEdited;
     }
 
     public void deleteNote() {
+        noteTabLink.click();
         wait.until(ExpectedConditions.visibilityOf(deleteNoteButton));
         deleteNoteButton.click();
     }
 
     public NoteForm checkSubmittedNote() {
+        noteTabLink.click();
         wait.until(ExpectedConditions.visibilityOf(savedNoteTitle));
         return new NoteForm(null, savedNoteTitle.getText(), savedNoteDescription.getText());
-    }
-
-    public void logout() {
-        logoutButton.click();
     }
 
 
     // Credential Methods
 
     public List<CredentialForm> createCredential() {
-        List<CredentialForm> credentialsToBeSaved = Arrays.asList(
-                new CredentialForm(null, "www.cuploop.com", "Sina.M", "123"),
-                new CredentialForm(null, "www.google.com", "ssssina", "asd"),
-                new CredentialForm(null, "www.wise.com", "AAAA", "z")
-        );
+
         credentialTabLink.click();
         wait.until(WebDriver::getTitle);
         credentialsToBeSaved.forEach(credential -> {
@@ -163,6 +176,8 @@ public class HomePage {
     }
 
     public List<CredentialForm> checkSubmittedCredentials() throws IndexOutOfBoundsException {
+        credentialTabLink.click();
+        wait.until(WebDriver::getTitle);
 
         List<CredentialForm> allSavedCredentials = new ArrayList<>();
         wait.until(ExpectedConditions.visibilityOf(savedCredentials.get(0)));
@@ -176,16 +191,14 @@ public class HomePage {
     }
 
     public List<String> GetUnencryptedPasswordsAndEditCredentials() {
+        credentialTabLink.click();
+        wait.until(WebDriver::getTitle);
         List<String> unencryptedPasswords = new ArrayList<>();
         wait.until(ExpectedConditions.visibilityOf(savedCredentials.get(0)));
 
-        List<CredentialForm> ModifiedCredentials = Arrays.asList(
-                new CredentialForm(null, "www.amazon.com", "Sina_Mohebbi", "123"),
-                new CredentialForm(null, "www.facebook.com", "sinaaaaa", "asd"),
-                new CredentialForm(null, "www.Revolut.com", "gggg", "z")
-        );
 
-        for (int i=0; i < ModifiedCredentials.size(); i++) {
+
+        for (int i = 0; i < credentialsToBeEdited.size(); i++) {
             wait.until(ExpectedConditions.elementToBeClickable(addNewCredentialButton));
             WebElement editButton = driver.findElement(By.xpath("/html/body/div/div[@id='contentDiv']/div/div[@id='nav-credentials']/div[1]/table/tbody["+( i + 1)+"]/tr/td[1]/button"));
 
@@ -194,9 +207,9 @@ public class HomePage {
             unencryptedPasswords.add(credentialPasswordInput.getAttribute("value"));
 
             credentialUrlInput.clear();
-            credentialUrlInput.sendKeys(ModifiedCredentials.get(i).getUrl());
+            credentialUrlInput.sendKeys(credentialsToBeEdited.get(i).getUrl());
             credentialUsernameInput.clear();
-            credentialUsernameInput.sendKeys(ModifiedCredentials.get(i).getUsername());
+            credentialUsernameInput.sendKeys(credentialsToBeEdited.get(i).getUsername());
             credentialSubmitButton.click();
 
             wait.until(WebDriver::getTitle);
@@ -208,6 +221,7 @@ public class HomePage {
     }
 
     public void deleteCredentials(int numberOfElementsToDelete) {
+        credentialTabLink.click();
         wait.until(ExpectedConditions.visibilityOf(savedCredentials.get(0)));
         for (int i=0; i < numberOfElementsToDelete;i++) {
             WebElement deleteButton = driver.findElement(By.xpath("/html/body/div/div[@id='contentDiv']/div/div[@id='nav-credentials']/div[1]/table/tbody/tr/td[1]/a"));
@@ -217,5 +231,9 @@ public class HomePage {
             driver.findElement(By.id("success-message-back-home")).click();
             wait.until(WebDriver::getTitle);
         }
+    }
+
+    public List<CredentialForm> getCredentialsToBeSaved() {
+        return credentialsToBeSaved;
     }
 }

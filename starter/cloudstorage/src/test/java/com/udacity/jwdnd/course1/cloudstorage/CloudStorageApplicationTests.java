@@ -10,7 +10,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.File;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CloudStorageApplicationTests {
 
 	@LocalServerPort
@@ -51,6 +50,7 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(1)
 	public void getLoginPage() {
 		driver.get("http://localhost:" + this.port + "/login");
 		assertEquals("Login", driver.getTitle());
@@ -150,6 +150,7 @@ class CloudStorageApplicationTests {
 	 * https://review.udacity.com/#!/rubrics/2724/view 
 	 */
 	@Test
+	@Order(2)
 	public void testRedirection() {
 		// Create a test account
 		doMockSignUp("Redirection","Test","RT","123");
@@ -171,6 +172,7 @@ class CloudStorageApplicationTests {
 	 * https://attacomsian.com/blog/spring-boot-custom-error-page#displaying-custom-error-page
 	 */
 	@Test
+	@Order(3)
 	public void testBadUrl() {
 		// Create a test account
 		doMockSignUp("URL","Test","UT","123");
@@ -195,6 +197,7 @@ class CloudStorageApplicationTests {
 	 * https://spring.io/guides/gs/uploading-files/ under the "Tuning File Upload Limits" section.
 	 */
 	@Test
+	@Order(4)
 	public void testLargeUpload() {
 		// Create a test account
 		doMockSignUp("Large File","Test","LFT","123");
@@ -220,6 +223,7 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(5)
 	public void unauthorizedUserAccessTest() {
 		driver.get("http://localhost:" + this.port + "/login");
 		wait.until(WebDriver::getTitle);
@@ -239,6 +243,7 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(6)
 	public void homePageAccessibilityTest() {
 		doMockSignUp("homePageAccess", "Test" , "homePageAccess.Test","123");
 		doLogIn("homePageAccess.Test", "123");
@@ -252,10 +257,11 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(7)
 	public void noteCreationFunctionalityTest() throws InterruptedException {
-		doMockSignUp("noteCreation", "Test" , "noteCreation.Test","123");
+		doMockSignUp("note", "Test" , "note.Test","123");
 
-		doLogIn("noteCreation.Test", "123");
+		doLogIn("note.Test", "123");
 
 		NoteForm submittedNote = homaPage.createNote();
 		wait.until(WebDriver::getTitle);
@@ -268,15 +274,10 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(8)
 	public void noteEditFunctionalityTest() throws InterruptedException {
-		doMockSignUp("noteEdit", "Test" , "noteEdit.Test","123");
 
-		doLogIn("noteEdit.Test", "123");
-
-		NoteForm submittedNote = homaPage.createNote();
-		wait.until(WebDriver::getTitle);
-		driver.findElement(By.id("success-message-back-home")).click();
-		wait.until(WebDriver::getTitle);
+		doLogIn("note.Test", "123");
 
 		NoteForm editedNote = homaPage.editNote();
 		wait.until(WebDriver::getTitle);
@@ -289,16 +290,11 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(9)
 	public void noteDeleteFunctionalityTest() {
-		doMockSignUp("noteDelete", "Test" , "noteDelete.Test","123");
+		doLogIn("note.Test", "123");
 
-		doLogIn("noteDelete.Test", "123");
-
-		NoteForm submittedNote = homaPage.createNote();
 		wait.until(WebDriver::getTitle);
-		driver.findElement(By.id("success-message-back-home")).click();
-		wait.until(WebDriver::getTitle);
-
 		homaPage.deleteNote();
 		wait.until(WebDriver::getTitle);
 		driver.findElement(By.id("success-message-back-home")).click();
@@ -309,9 +305,10 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(10)
 	public void credentialCreationFunctionalityTest() {
-		doMockSignUp("credentialCreation", "Test" , "credentialCreation.Test","123");
 
+		doMockSignUp("credential", "Test" , "credentialCreation.Test","123");
 		doLogIn("credentialCreation.Test", "123");
 
 		List<CredentialForm> credentialsToBeSaved = homaPage.createCredential();
@@ -326,12 +323,11 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(11)
 	public void credentialsEditFunctionalityTest() {
-		doMockSignUp("credentialsEdit", "Test" , "credentialsEdit.Test","123");
+		doLogIn("credentialCreation.Test", "123");
 
-		doLogIn("credentialsEdit.Test", "123");
-
-		List<CredentialForm> credentialsToBeSaved = homaPage.createCredential();
+		List<CredentialForm> credentialsToBeSaved =  homaPage.getCredentialsToBeSaved();
 
 		List<String> credentialsUnencryptedPasswords = homaPage.GetUnencryptedPasswordsAndEditCredentials();
 
@@ -345,14 +341,13 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	@Order(12)
 	public void credentialsDeleteFunctionalityTest() {
-		doMockSignUp("credentialsDelete", "Test" , "credentialsDelete.Test","123");
 
-		doLogIn("credentialsDelete.Test", "123");
+		doLogIn("credentialCreation.Test", "123");
+		List<CredentialForm> savedCredentials =  homaPage.checkSubmittedCredentials();
 
-		List<CredentialForm> credentialsToBeSaved = homaPage.createCredential();
-
-		homaPage.deleteCredentials(credentialsToBeSaved.size());
+		homaPage.deleteCredentials(savedCredentials.size());
 		assertThrows(IndexOutOfBoundsException.class, () -> {homaPage.checkSubmittedCredentials();} );
 	}
 }
