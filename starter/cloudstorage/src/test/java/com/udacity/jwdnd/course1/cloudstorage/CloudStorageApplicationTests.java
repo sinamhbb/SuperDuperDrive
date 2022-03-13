@@ -1,5 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
@@ -9,12 +10,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.File;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CloudStorageApplicationTests {
 
 	@LocalServerPort
@@ -23,10 +27,7 @@ class CloudStorageApplicationTests {
 	private WebDriver driver;
 	private WebDriverWait wait;
 
-	private LoginPage loginPage;
-	private SignupPage signupPage;
 	private HomePage homaPage;
-	private ResultPage resultPage;
 
 
 	@BeforeAll
@@ -39,12 +40,7 @@ class CloudStorageApplicationTests {
 		this.driver = new ChromeDriver();
 		wait = new WebDriverWait(driver, 1);
 
-
-		loginPage = new LoginPage(driver);
-		signupPage = new SignupPage(driver);
 		homaPage = new HomePage(driver);
-		resultPage = new ResultPage(driver);
-
 	}
 
 	@AfterEach
@@ -243,9 +239,9 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
-	public void homePageAccessibility() {
-		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
-		doLogIn("Sina.M", "123");
+	public void homePageAccessibilityTest() {
+		doMockSignUp("homePageAccess", "Test" , "homePageAccess.Test","123");
+		doLogIn("homePageAccess.Test", "123");
 		assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
 
 		homaPage.logout();
@@ -257,9 +253,9 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void noteCreationFunctionalityTest() throws InterruptedException {
-		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+		doMockSignUp("noteCreation", "Test" , "noteCreation.Test","123");
 
-		doLogIn("Sina.M", "123");
+		doLogIn("noteCreation.Test", "123");
 
 		NoteForm submittedNote = homaPage.createNote();
 		wait.until(WebDriver::getTitle);
@@ -273,9 +269,9 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void noteEditFunctionalityTest() throws InterruptedException {
-		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+		doMockSignUp("noteEdit", "Test" , "noteEdit.Test","123");
 
-		doLogIn("Sina.M", "123");
+		doLogIn("noteEdit.Test", "123");
 
 		NoteForm submittedNote = homaPage.createNote();
 		wait.until(WebDriver::getTitle);
@@ -294,9 +290,9 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void noteDeleteFunctionalityTest() {
-		doMockSignUp("Sina", "Mohebbi" , "Sina.M","123");
+		doMockSignUp("noteDelete", "Test" , "noteDelete.Test","123");
 
-		doLogIn("Sina.M", "123");
+		doLogIn("noteDelete.Test", "123");
 
 		NoteForm submittedNote = homaPage.createNote();
 		wait.until(WebDriver::getTitle);
@@ -312,4 +308,51 @@ class CloudStorageApplicationTests {
 
 	}
 
+	@Test
+	public void credentialCreationFunctionalityTest() {
+		doMockSignUp("credentialCreation", "Test" , "credentialCreation.Test","123");
+
+		doLogIn("credentialCreation.Test", "123");
+
+		List<CredentialForm> credentialsToBeSaved = homaPage.createCredential();
+
+		List<CredentialForm> allSavedCredentials = homaPage.checkSubmittedCredentials();
+
+		credentialsToBeSaved.forEach( credential -> {
+			assertEquals(credential.getUrl(),allSavedCredentials.get(credentialsToBeSaved.indexOf(credential)).getUrl());
+			assertEquals(credential.getUsername(),allSavedCredentials.get(credentialsToBeSaved.indexOf(credential)).getUsername());
+			assertNotEquals(credential.getPassword(),allSavedCredentials.get(credentialsToBeSaved.indexOf(credential)).getPassword());
+		});
+	}
+
+	@Test
+	public void credentialsEditFunctionalityTest() {
+		doMockSignUp("credentialsEdit", "Test" , "credentialsEdit.Test","123");
+
+		doLogIn("credentialsEdit.Test", "123");
+
+		List<CredentialForm> credentialsToBeSaved = homaPage.createCredential();
+
+		List<String> credentialsUnencryptedPasswords = homaPage.GetUnencryptedPasswordsAndEditCredentials();
+
+		List<CredentialForm> allSavedCredentials = homaPage.checkSubmittedCredentials();
+
+		credentialsToBeSaved.forEach( credential -> {
+			assertEquals(credential.getPassword(),credentialsUnencryptedPasswords.get(credentialsToBeSaved.indexOf(credential)));
+			assertNotEquals(credential.getUrl(),allSavedCredentials.get(credentialsToBeSaved.indexOf(credential)).getUrl());
+			assertNotEquals(credential.getUsername(),allSavedCredentials.get(credentialsToBeSaved.indexOf(credential)).getUsername());
+		});
+	}
+
+	@Test
+	public void credentialsDeleteFunctionalityTest() {
+		doMockSignUp("credentialsDelete", "Test" , "credentialsDelete.Test","123");
+
+		doLogIn("credentialsDelete.Test", "123");
+
+		List<CredentialForm> credentialsToBeSaved = homaPage.createCredential();
+
+		homaPage.deleteCredentials(credentialsToBeSaved.size());
+		assertThrows(IndexOutOfBoundsException.class, () -> {homaPage.checkSubmittedCredentials();} );
+	}
 }
