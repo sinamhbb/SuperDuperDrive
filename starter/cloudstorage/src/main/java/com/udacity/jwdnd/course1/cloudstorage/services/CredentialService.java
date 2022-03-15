@@ -16,21 +16,20 @@ import java.util.List;
 public class CredentialService {
 
     private final CredentialMapper credentialMapper;
-    private final UserMapper userMapper;
     private final EncryptionService encryptionService;
 
-    public CredentialService(CredentialMapper credentialMapper, UserMapper userMapper, HashService hashService, EncryptionService encryptionService) {
+
+
+    public CredentialService(CredentialMapper credentialMapper, EncryptionService encryptionService) {
         this.credentialMapper = credentialMapper;
-        this.userMapper = userMapper;
         this.encryptionService = encryptionService;
     }
 
-    public List<Credential> getUserCredentials(String username) {
-        User user = userMapper.getUser(username);
-        return credentialMapper.getUserCredentials(user.getUserid());
+    public List<Credential> getUserCredentials(Integer userid) {
+        return credentialMapper.getUserCredentials(userid);
     }
 
-    public int upsertCredential(CredentialForm credentialForm, String username) {
+    public int upsertCredential(CredentialForm credentialForm, Integer userid) {
 
         SecureRandom random = new SecureRandom();
         byte[] key = new byte[16];
@@ -39,13 +38,12 @@ public class CredentialService {
         String encryptedPassword = encryptionService.encryptValue(credentialForm.getPassword(),encodedKey);
 
         if (credentialForm.getCredentialid() != null) {
-            return credentialMapper.update(new Credential(credentialForm.getCredentialid(), credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encryptedPassword, userMapper.getUser(username).getUserid()));
+                return credentialMapper.update(new Credential(credentialForm.getCredentialid(), credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encryptedPassword, userid));
         }
-        return credentialMapper.insert(new Credential(null, credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encryptedPassword, userMapper.getUser(username).getUserid()));
+        return credentialMapper.insert(new Credential(null, credentialForm.getUrl(), credentialForm.getUsername(), encodedKey, encryptedPassword, userid));
     }
 
     public int deleteCredential(String credentialid) {
-        return credentialMapper.delete(Integer.parseInt(credentialid));
+            return credentialMapper.delete(Integer.parseInt(credentialid));
     }
-
 }

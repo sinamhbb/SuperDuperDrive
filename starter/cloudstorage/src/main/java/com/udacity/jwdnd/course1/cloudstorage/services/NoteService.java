@@ -14,27 +14,24 @@ import java.util.List;
 public class NoteService {
 
     private final NoteMapper noteMapper;
-    private final UserMapper userMapper;
 
-    public NoteService(NoteMapper noteMapper, UserMapper userMapper) {
+    public NoteService(NoteMapper noteMapper) {
         this.noteMapper = noteMapper;
-        this.userMapper = userMapper;
     }
 
-    public List<Note> getUserNotes(String username) {
-        User user = userMapper.getUser(username);
-        return noteMapper.getUserNotes(user.getUserid());
+    public List<Note> getUserNotes(Integer userid) {
+        return noteMapper.getUserNotes(userid);
     }
 
     public Note getNoteById(String noteid) {
         return noteMapper.getNoteById(Integer.parseInt(noteid));
     };
 
-    public int upsertNote(NoteForm receivedNote, String username) {
+    public int upsertNote(NoteForm receivedNote, Integer userid) {
         if (receivedNote.getNoteid() != null) {
-           return noteMapper.update(new Note(receivedNote.getNoteid(), receivedNote.getNotetitle(), receivedNote.getNotedescription(), userMapper.getUser(username).getUserid()));
+           return noteMapper.update(new Note(receivedNote.getNoteid(), receivedNote.getNotetitle(), receivedNote.getNotedescription(), userid));
         }
-        return noteMapper.insert(new Note(null, receivedNote.getNotetitle(), receivedNote.getNotedescription(), userMapper.getUser(username).getUserid()));
+        return noteMapper.insert(new Note(null, receivedNote.getNotetitle(), receivedNote.getNotedescription(), userid));
     }
 
     public int deleteNote(String noteid) {
