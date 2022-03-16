@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 @Controller()
 public class FileController {
@@ -36,7 +35,6 @@ public class FileController {
     public ModelAndView handleFileUpload(
             @RequestParam("userid") String userid,
             @RequestParam("fileUpload") MultipartFile fileUpload,
-            Model model,
             Authentication authentication,
             HttpServletRequest request
     ) {
@@ -46,11 +44,10 @@ public class FileController {
             request.setAttribute("errorMessage", "No File Found");
             return new ModelAndView("/result");
         } else {
-            User user = userService.getUser(authentication.getName());
             try {
+                User user = userService.getUser(authentication.getName());
                 if (Integer.parseInt(userid) == user.getUserid()) {
                     int fileId = fileService.upsertFile(fileUpload, user.getUserid());
-                    model.addAttribute("Files", fileService.getFiles(user.getUserid()));
                     request.setAttribute("errorMessage", "null");
                     return new ModelAndView("/result");
                 } else { throw new SecurityException("You are not permitted to perform this action!");}
@@ -64,7 +61,9 @@ public class FileController {
     }
 
     @GetMapping("/file-download")
-    public ResponseEntity<Resource> handleFileDownload(@RequestParam("userid") String userid,@RequestParam(value = "fileId") String fileId, Authentication authentication) {
+    public ResponseEntity<Resource> handleFileDownload(@RequestParam("userid") String userid,
+                                                       @RequestParam(value = "fileId") String fileId,
+                                                       Authentication authentication) {
         try {
             User user = userService.getUser(authentication.getName());
             if (Integer.parseInt(userid) == user.getUserid()) {
@@ -80,13 +79,15 @@ public class FileController {
     }
 
     @GetMapping("/file-delete")
-    public ModelAndView handleFileDelete(@RequestParam("userid") String userid,@RequestParam(value="fileId") String fileId, Authentication authentication, Model model, HttpServletRequest request) {
+    public ModelAndView handleFileDelete(@RequestParam("userid") String userid,
+                                         @RequestParam(value="fileId") String fileId,
+                                         Authentication authentication,
+                                         HttpServletRequest request) {
         request.setAttribute("tab", "files");
         try {
             User user = userService.getUser(authentication.getName());
             if (Integer.parseInt(userid) == user.getUserid()) {
                 var deleteId = fileService.deleteFile(fileId);
-                model.addAttribute("Files", fileService.getFiles(user.getUserid()));
                 request.setAttribute("errorMessage", "null");
                 return new ModelAndView("/result");
             } else {

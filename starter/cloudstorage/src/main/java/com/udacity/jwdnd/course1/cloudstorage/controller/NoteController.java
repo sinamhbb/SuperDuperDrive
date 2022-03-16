@@ -29,14 +29,13 @@ public class NoteController {
     @PostMapping("/upsert-note")
     public ModelAndView handleNewNote(@RequestParam("userid") String userid,
                                       @ModelAttribute("newNote") NoteForm newNote,
-                                      Model model, Authentication authentication,
+                                      Authentication authentication,
                                       HttpServletRequest request) {
         request.setAttribute("tab", "notes");
         try {
             User user = userService.getUser(authentication.getName());
             if (Integer.parseInt(userid) == user.getUserid()) {
                 noteService.upsertNote(newNote, user.getUserid());
-                model.addAttribute("Notes", noteService.getUserNotes(user.getUserid()));
                 request.setAttribute("errorMessage", "null");
                 return new ModelAndView("/result");
             } else {
@@ -51,7 +50,6 @@ public class NoteController {
     @GetMapping("/delete-note")
     public ModelAndView handleDeleteNote(@RequestParam("userid") String userid,
                                          @RequestParam("noteid") String noteid,
-                                         Model model,
                                          Authentication authentication,
                                          HttpServletRequest request) {
         request.setAttribute("tab", "notes");
@@ -59,7 +57,6 @@ public class NoteController {
             User user = userService.getUser(authentication.getName());
             if (Integer.parseInt(userid) == user.getUserid()) {
                 noteService.deleteNote(noteid);
-                model.addAttribute("Notes", noteService.getUserNotes(user.getUserid()));
                 request.setAttribute("errorMessage", "null");
                 return new ModelAndView("/result");
             } else {

@@ -29,7 +29,6 @@ public class CredentialController {
     @PostMapping("/upsert-credential")
     public ModelAndView handleUpsertCredential(@RequestParam("userid") String userid,
                                                @ModelAttribute("newCredential") CredentialForm credentialForm,
-                                               Model model,
                                                Authentication authentication,
                                                HttpServletRequest request) {
 
@@ -38,14 +37,11 @@ public class CredentialController {
             User user = userService.getUser(authentication.getName());
             if (Integer.parseInt(userid) == user.getUserid()) {
                 credentialService.upsertCredential(credentialForm, user.getUserid());
-                model.addAttribute("Credentials", credentialService.getUserCredentials(user.getUserid()));
                 request.setAttribute("errorMessage", "null");
-
                 return new ModelAndView("/result");
             } else {
                 throw new SecurityException("You are not permitted to perform this action!");
             }
-
         } catch (Exception e) {
             request.setAttribute("errorMessage", e.getMessage());
             return new ModelAndView("/result");
@@ -55,7 +51,6 @@ public class CredentialController {
     @GetMapping("/delete-credential")
     public ModelAndView handleDeleteCredential(@RequestParam("userid") String userid,
                                                @RequestParam("credentialid") String credentialid,
-                                               Model model,
                                                Authentication authentication,
                                                HttpServletRequest request) {
 
@@ -64,7 +59,6 @@ public class CredentialController {
                 User user = userService.getUser(authentication.getName());
                 if (Integer.parseInt(userid) == user.getUserid()) {
                     credentialService.deleteCredential(credentialid);
-                    model.addAttribute("Credentials", credentialService.getUserCredentials(user.getUserid()));
                     request.setAttribute("errorMessage", "null");
                     return new ModelAndView("result");
                 } else {

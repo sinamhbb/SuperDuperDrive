@@ -29,7 +29,7 @@ public class SignupController {
         String signupError = null;
 
         if(!userService.isUserAvailable(user.getUsername())) {
-            signupError = "The username already exists.";
+            signupError = "The username already exist.";
         }
 
         if (signupError == null) {
