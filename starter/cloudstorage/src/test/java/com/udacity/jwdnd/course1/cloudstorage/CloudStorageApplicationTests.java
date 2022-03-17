@@ -103,9 +103,6 @@ class CloudStorageApplicationTests {
 		*/
 
 		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
-		WebElement loginLink = driver.findElement(By.id("login-link"));
-		loginLink.click();
-		wait.until(WebDriver::getTitle);
 	}
 
 	
@@ -154,7 +151,7 @@ class CloudStorageApplicationTests {
 	public void testRedirection() {
 		// Create a test account
 		doMockSignUp("Redirection","Test","RT","123");
-		
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("login-button")));
 		// Check if we have been redirected to the log in page.
 		assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
 	}
